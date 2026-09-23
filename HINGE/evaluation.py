@@ -67,19 +67,6 @@ def compute_neighborhood_consistency(
 
 
 
-STRATEGY_LABELS = {
-    'A_distance'  : 'Distance\nonly',
-    'B_histology' : 'Histology\nonly',
-    'C_expression': 'Expression\nonly',
-    'D_combined'  : 'Histology +\nExpression',
-}
-STRATEGY_COLORS = {
-    'A_distance'  : '#95a5a6',
-    'B_histology' : '#3498db',
-    'C_expression': '#2ecc71',
-    'D_combined'  : '#e74c3c',
-}
-
 
 def plot_ablation_summary(all_eval_scores, save_dir):
     """
