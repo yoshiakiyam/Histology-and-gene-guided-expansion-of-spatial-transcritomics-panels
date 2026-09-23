@@ -75,19 +75,18 @@ def get_normalized_X(adata, genes):
         return X
     
 
-def prepare_expression_features(predicted_rna, pairs, n_comps=50, normalize_expr = False):
+def prepare_expression_features(rna_panel1, rna_panel2, n_comps=50, normalize_expr = False):
 
     print("\n" + "=" * 55)
     print("  Preparing expression features (overlapping genes PCA)")
     print("=" * 55)
 
-    name_panel1_list = [p[0] for p in pairs]
-    name_panel2_list  = [p[1] for p in pairs]
-
     # Find genes overlapping across ALL samples
-    overlap_genes = set(predicted_rna[name_panel1_list[0]].var_names)
-    for name in name_panel1_list[1:] + name_panel2_list:
-        overlap_genes &= set(predicted_rna[name].var_names)
+    overlap_genes = set(rna_panel1[0].var_names)
+    for sample in rna_panel1[1:] + rna_panel2:
+        overlap_genes &= set(sample.var_names)
+        
+        
     overlap_genes = sorted(overlap_genes)
     print(f"  Overlapping genes across all samples: {len(overlap_genes)}")
 
@@ -97,14 +96,14 @@ def prepare_expression_features(predicted_rna, pairs, n_comps=50, normalize_expr
     if normalize_expr:
         
         X_panel1_all = np.vstack([
-            get_normalized_X(predicted_rna[n], overlap_genes)
-            for n in name_panel1_list
+            get_normalized_X(rna_panel1_sample, overlap_genes)
+            for rna_panel1_sample in rna_panel1
         ])
         
     else:
         X_panel1_all = np.vstack([
-            predicted_rna[n][:, overlap_genes].copy()
-            for n in name_panel1_list
+            rna_panel1_sample[:, overlap_genes].copy()
+            for rna_panel1_sample in rna_panel1
         ])
         
     # Fit PCA on all of panel 1 samples combined
@@ -119,25 +118,24 @@ def prepare_expression_features(predicted_rna, pairs, n_comps=50, normalize_expr
     expr_panel1_list = []
     expr_panel2_list  = []
 
-    for name_panel1, name_panel2 in pairs:
+    for rna_panel1_sample, rna_panel2_sample in zip(rna_panel1, rna_panel2):
         
         if normalize_expr:
-            X_480 = get_normalized_X(predicted_rna[name_panel1], overlap_genes)
-            X_5k  = get_normalized_X(predicted_rna[name_panel2],  overlap_genes)
+            X_panel1 = get_normalized_X(rna_panel1_sample, overlap_genes)
+            X_panel2  = get_normalized_X(rna_panel2_sample,  overlap_genes)
         else:
-            X_480 = predicted_rna[name_panel1][:, overlap_genes].copy()
-            X_5k  = predicted_rna[name_panel2][:, overlap_genes].copy()
+            X_panel1 = rna_panel1_sample[:, overlap_genes].copy()
+            X_panel2  = rna_panel2_sample[:, overlap_genes].copy()
 
             
         
 
         # Transform and normalize each panel's expression
-        e_480 = normalize(pca.transform(X_480))
-        e_5k  = normalize(pca.transform(X_5k))
+        e_panel1 = normalize(pca.transform(X_panel1))
+        e_panel2  = normalize(pca.transform(X_panel2))
 
-        expr_panel1_list.append(e_480)
-        expr_panel2_list.append(e_5k)
-        print(f"  {name_panel1}/{name_panel2}: "
-              f"panel 1 expr {e_480.shape}, panel 2 expr {e_5k.shape}")
+        expr_panel1_list.append(e_panel1)
+        expr_panel2_list.append(e_panel2)
+
 
     return expr_panel1_list, expr_panel2_list, pca, overlap_genes

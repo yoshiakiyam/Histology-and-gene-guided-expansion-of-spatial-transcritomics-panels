@@ -63,12 +63,24 @@ def compute_neighborhood_consistency(
 
 
 
+STRATEGY_LABELS = {
+    'A_distance'  : 'Distance\nonly',
+    'B_histology' : 'Histology\nonly',
+    'C_expression': 'Expression\nonly',
+    'D_combined'  : 'Histology +\nExpression',
+}
+STRATEGY_COLORS = {
+    'A_distance'  : '#95a5a6',
+    'B_histology' : '#3498db',
+    'C_expression': '#2ecc71',
+    'D_combined'  : '#e74c3c',
+}
 
 
 
 
 
-def plot_ablation_summary(all_eval_scores, save_dir):
+def plot_ablation_summary(all_eval_scores):
     """
     3-panel summary figure pooled across all 6 pairs:
         Left   : violin plot of score distributions
@@ -145,7 +157,7 @@ def plot_ablation_summary(all_eval_scores, save_dir):
     #print(f"Saved: {out}")
 
 
-def plot_ablation_per_pair(per_pair_scores, pairs, save_dir):
+def plot_ablation_per_pair(per_pair_scores, pairs):
     """
     One figure per pair showing score distributions across strategies.
     Lets you see which pairs benefit most from biological signals.
