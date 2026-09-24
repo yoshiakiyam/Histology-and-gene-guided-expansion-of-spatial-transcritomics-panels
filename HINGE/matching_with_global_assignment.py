@@ -293,10 +293,8 @@ def run_all_strategies(
     expr_panel2,
     max_dist=50.0,
     k_candidates=None,
-    pair_label="",
     threshold=None,
 ):
-    print(f"\n  --- {pair_label} ---")
 
     return {
         "A_distance": match_distance_only(
