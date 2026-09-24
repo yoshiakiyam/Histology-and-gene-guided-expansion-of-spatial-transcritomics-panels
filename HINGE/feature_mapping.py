@@ -17,7 +17,6 @@ import scanpy as sc
     Fits one PCA jointly on ALL samples (480 + 5k combined) so both
     panels live in the same morphological feature space.
 
-    Returns two lists of L2-normalized arrays aligned to `pairs`.
 """
 def prepare_morphology_features(uni_panel1_list, uni_panel2_list, pairs,
                                   n_pca_comps=100):
@@ -48,11 +47,13 @@ def prepare_morphology_features(uni_panel1_list, uni_panel2_list, pairs,
 
     morph_480_list = []
     morph_5k_list  = []
+    
+    
 
     # Transform and normalize each panel's UNI features
-    for pair_idx, (name_panel1, name_panel2) in enumerate(pairs):
-        X_panel1 = uni_panel1_list[pair_idx].X
-        X_panel2 = uni_panel2_list[pair_idx].X
+    for uni_panel1, uni_panel2 in zip(uni_panel1_list, uni_panel2_list):
+        X_panel1 = uni_panel1.X
+        X_panel2 = uni_panel2.X
         if issparse(X_panel1): X_panel1 = X_panel1.toarray()
         if issparse(X_panel2):  X_panel2  = X_panel2.toarray()
 
@@ -61,8 +62,7 @@ def prepare_morphology_features(uni_panel1_list, uni_panel2_list, pairs,
 
         morph_480_list.append(m_panel1)
         morph_5k_list.append(m_panel2)
-        print(f"  {name_panel1}/{name_panel2}: "
-              f"panel 1 morph {m_panel1.shape}, panel 2 morph {m_panel2.shape}")
+        print( f"panel 1 morph {m_panel1.shape}, panel 2 morph {m_panel2.shape}")
 
     return morph_480_list, morph_5k_list, pca
 
