@@ -17,8 +17,9 @@ import scanpy as sc
     Fits one PCA jointly on ALL samples (480 + 5k combined) so both
     panels live in the same morphological feature space.
 
+    Returns two lists of L2-normalized arrays aligned to `pairs`.
 """
-def prepare_morphology_features(uni_panel1_list, uni_panel2_list, pairs,
+def prepare_morphology_features(uni_panel1_list, uni_panel2_list,
                                   n_pca_comps=100):
 
     print("=" * 55)
@@ -49,7 +50,6 @@ def prepare_morphology_features(uni_panel1_list, uni_panel2_list, pairs,
     morph_5k_list  = []
     
     
-
     # Transform and normalize each panel's UNI features
     for uni_panel1, uni_panel2 in zip(uni_panel1_list, uni_panel2_list):
         X_panel1 = uni_panel1.X
@@ -101,11 +101,13 @@ def prepare_expression_features(rna_panel1, rna_panel2, n_comps=50, normalize_ex
         ])
         
     else:
+        # :white_check_mark: Extract .X and convert to dense numpy array
         X_panel1_all = np.vstack([
-            rna_panel1_sample[:, overlap_genes].copy()
+            rna_panel1_sample[:, overlap_genes].X.toarray()
+            if issparse(rna_panel1_sample[:, overlap_genes].X)
+            else np.array(rna_panel1_sample[:, overlap_genes].X)
             for rna_panel1_sample in rna_panel1
         ])
-        
     # Fit PCA on all of panel 1 samples combined
     n_comps_actual = min(n_comps, len(overlap_genes) - 1)
     print(f"  Fitting expression PCA on {X_panel1_all.shape} "
@@ -124,10 +126,13 @@ def prepare_expression_features(rna_panel1, rna_panel2, n_comps=50, normalize_ex
             X_panel1 = get_normalized_X(rna_panel1_sample, overlap_genes)
             X_panel2  = get_normalized_X(rna_panel2_sample,  overlap_genes)
         else:
-            X_panel1 = rna_panel1_sample[:, overlap_genes].copy()
-            X_panel2  = rna_panel2_sample[:, overlap_genes].copy()
-
-            
+            X_panel1 = (rna_panel1_sample[:, overlap_genes].X.toarray()
+                        if issparse(rna_panel1_sample[:, overlap_genes].X)
+                        else np.array(rna_panel1_sample[:, overlap_genes].X))
+        
+            X_panel2  = (rna_panel2_sample[:, overlap_genes].X.toarray()
+                         if issparse(rna_panel2_sample[:, overlap_genes].X)
+                         else np.array(rna_panel2_sample[:, overlap_genes].X))
         
 
         # Transform and normalize each panel's expression
@@ -136,6 +141,8 @@ def prepare_expression_features(rna_panel1, rna_panel2, n_comps=50, normalize_ex
 
         expr_panel1_list.append(e_panel1)
         expr_panel2_list.append(e_panel2)
+
+        print(f"Panel 1 expr {e_panel1.shape}, Panel 2 expr {e_panel1.shape}")
 
 
     return expr_panel1_list, expr_panel2_list, pca, overlap_genes
