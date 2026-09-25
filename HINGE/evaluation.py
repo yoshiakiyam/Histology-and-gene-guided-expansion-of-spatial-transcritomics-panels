@@ -164,7 +164,7 @@ def plot_ablation_per_pair(per_pair_scores):
     """
     strategies = list(STRATEGY_LABELS.keys())
 
-    for scores in per_pair_scores.items():
+    for _, scores in per_pair_scores.items():
 
         fig, axes = plt.subplots(1, 2, figsize=(12, 4))
         fig.suptitle(f'Neighborhood Consistency',
