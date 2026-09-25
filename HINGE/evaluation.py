@@ -157,19 +157,17 @@ def plot_ablation_summary(all_eval_scores):
     #print(f"Saved: {out}")
 
 
-def plot_ablation_per_pair(per_pair_scores, pairs):
+def plot_ablation_per_pair(per_pair_scores):
     """
     One figure per pair showing score distributions across strategies.
     Lets you see which pairs benefit most from biological signals.
     """
     strategies = list(STRATEGY_LABELS.keys())
 
-    for name_480, name_5k in pairs:
-        pair_key = f"{name_480}/{name_5k}"
-        scores   = per_pair_scores[pair_key]
+    for scores in per_pair_scores.items():
 
         fig, axes = plt.subplots(1, 2, figsize=(12, 4))
-        fig.suptitle(f'Pair: {pair_key} — Neighborhood Consistency',
+        fig.suptitle(f'Neighborhood Consistency',
                      fontsize=12, fontweight='bold')
 
         # Violin
@@ -208,8 +206,7 @@ def plot_ablation_per_pair(per_pair_scores, pairs):
                     color=color, fontweight='bold')
 
         plt.tight_layout()
-        #out = Path(save_dir) / f'ablation_{name_480}_{name_5k}.png'
-        #plt.savefig(out, dpi=130, bbox_inches='tight')
+
         plt.show()
         #print(f"Saved: {out}")
 
